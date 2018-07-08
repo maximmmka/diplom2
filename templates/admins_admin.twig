@@ -1,0 +1,97 @@
+{% extends 'main_admin.twig' %}
+
+{% block content %}
+
+<div class="table-responsive container"  style="padding-bottom: 40px; margin-top: 70px;">
+
+    <form role="form" class="form-horizontal" method="POST">
+        {% if error is not empty %}
+            <div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <div class="form-group has-feedback">
+            <label for="login" class="form-control-label col-sm-1" >Логин</label>
+            <div class="col-sm-4">
+                {% if admin is not null %}
+                    <input type="text" class="form-control" required="required" name="login" pattern="{6,}" value="{{ admin.login }}" placeholder="Логин">
+                {%  else %}
+                    <input type="text" class="form-control" required="required" name="login" pattern="{6,}" placeholder="Логин">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group has-feedback">
+            <label for="password" class="form-control-label col-sm-1" >Пароль</label>
+            <div class="col-sm-4">
+                <input type="password" class="form-control" required="required" name="password" pattern="{6,}" placeholder="Пароль">
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="hidden" name="add_edit" value="{{ addEdit }}">
+                <input type="submit" class="btn btn-primary" value=
+                    {% if addEdit == 'edit' %}
+                       "Сохранить"
+                    {% else %}
+                       "Добавить"
+                    {% endif %}
+                name="addedit" id="addedit"/>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-bordered"  style="margin-top: 60px;">
+        <thead>
+            <tr>
+                <th>Администраторы</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for adm in admins %}
+            <tr>
+                <td>{{ adm.getLogin }}</td>
+                <td class="col-sm-2">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default">Действие</button>
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="index.php?mode=Admins&id={{ adm.getId }}&action=edit">Изменить</a></li>
+                                {% if adm.getId != adminId %}
+                                    <li><a href="index.php?mode=Admins&id={{ adm.getId }}&action=delete">Удалить</a></li>
+                                {% endif %}
+
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {%  endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script>
+        $(function() {
+            $('#addedit').click(function() {
+
+                $('input').each(function() {
+                    var formGroup = $(this).parents('.form-group');
+                    if (this.checkValidity()) {
+                        formGroup.addClass('has-success').removeClass('has-error');
+                    } else {
+                        formGroup.addClass('has-error').removeClass('has-success');
+                    }
+                });
+
+            });
+        });
+    </script>
+{% endblock %}

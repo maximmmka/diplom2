@@ -1,0 +1,143 @@
+{% extends "main_admin.twig" %}
+
+{% block content %}
+<div class="container" style="margin-top: 60px">
+
+    <ul class="nav navbar-nav">
+        <li role="presentation" class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                Темы <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="index.php?mode=Questions&id=-1&action=filter">Все</a> </li>
+                {% for category in categories %}
+                    <li><a href="index.php?mode=Questions&id={{ category.getCategoryId }}&action=filter">{{ category.getCategoryName }}</a> </li>
+                {% endfor %}
+            </ul>
+        </li>
+    </ul>
+
+    <ul class="nav navbar-nav navbar-right">
+        <li role="presentation" class="dropdown">
+            <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
+                Сортировка <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+                <li><a href="index.php?mode=Questions&id=1&action=sort">Свежие неотвеченные вопросы наверху</a></li>
+                <li><a href="index.php?mode=Questions&id=2&action=sort">По категории, по дате добавления</a></li>
+            </ul>
+        </li>
+    </ul>
+
+</div>
+
+<div class="container col-xs-12">
+    {% if error is not empty %}
+        <div class="alert alert-danger" role="alert">{{ error }}</div>
+    {% endif %}
+    <table id="main_table" class="table table-hover table-striped table-bordered table-condensed">
+        <thead>
+        <tr><th>Категория</th><th>Дата</th><th>Вопрос (нажмите, чтобы просмотреть список ответов)</th><th>Статус</th><th>Кто задал</th><th></th></tr>
+        </thead>
+
+        <tbody>
+        {% set id = 0 %}
+        {% for answer in answers %}
+
+            {% if id != answer.getQuestionId %}
+                <tr>
+                    <td>{{ answer.getCategoryName }} </td>
+                    <td>{{ answer.getDate }}</td>
+                    <td>
+                        <div class="panel-group" role="tablist" id="accordion" aria-multiselectable="true">
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="headingOne">
+                                    <h4 class="panel-title">
+                                        <a href="#collapse{{ loop.index0 }}" role="button" data-toggle="collapse" data-parent="#accordion"
+                                           aria-expanded="false" aria-controls="collapseOne" class="collapsed">{{ answer.getQuestionName }}</a>
+                                    </h4>
+                                </div>
+
+                                {% if answer.getAnswerName is not null %}
+
+                                   <div class="panel-collapse collapse" role="tabpanel" id="collapse{{ loop.index0 }}" aria-labelledby="headingOne" aria-expanded="false" style="height: 0px;">
+                                        <div class="panel-body">
+                                            <ul>
+                                                {% set start = loop.index0 %}
+                                                {% set end = loop.length - 1 %}
+                                                {% set id = answer.getQuestionId %}
+                                                {% set quit = true %}
+                                                {% for k in start..end if quit %}
+
+                                                    {% if id != answers[k].getQuestionId %}
+                                                       {% set quit = false %}
+                                                    {% else %}
+                                                        <li>{{ answers[k].getAnswerName }}</li>
+                                                    {% endif %}
+
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                   </div>
+
+                                {% endif %}
+
+                            </div>
+                        </div>
+
+                    </td>
+                    <td>{{ answer.getStatus.getName }}</td>
+                    <td>{{ answer.getUser.getName }}</td>
+                    <td>
+                        <div class="input-group">
+                            <div class="input-group-btn">
+                                <button type="button" class="btn btn-default">Действие</button>
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span class="caret"></span>
+                                    <span class="sr-only">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a href="index.php?mode=Questions_edit&id={{ answer.getQuestionId }}">Изменить</a></li>
+                                    <li><a href="index.php?mode=Questions&id={{ answer.getQuestionId }}&action=delete">Удалить</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="js/datatables.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var table = $('#main_table').DataTable({
+            "sPaginationType": "full_numbers",
+            "ordering": false,
+            "language": {
+                "lengthMenu": "Выводить _MENU_ записей на страницу",
+                "zeroRecords": "Ничего не найдено, извините",
+                "info": "Показано страниц _PAGE_ из _PAGES_",
+                "infoEmpty": "Нет данных",
+                "loadingRecords": "Загрузка...",
+                "processing": "Обработка...",
+                "infoFiltered": "",
+                "paginate": {
+                    "first": "В начало",
+                    "last": "В конец",
+                    "next": "Следующая",
+                    "previous": "Предыдущая"
+                },
+                "emptyTable": "Нет данных",
+                "search": "Поиск:"
+            }
+        });
+
+    });
+
+</script>
+{% endblock %}

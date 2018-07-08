@@ -1,0 +1,25 @@
+{
+    "require": {
+        "twbs/bootstrap": "^3.3",
+        "twig/twig": "^1.35"
+    },
+
+    "autoload": {
+        "classmap": [
+            "model/assets/Assist.class.php",
+            "model/data/Admin.class.php",
+            "model/data/Answer.class.php",
+            "model/data/Category.class.php",
+            "model/data/Content.class.php",
+            "model/data/Question.class.php",
+            "model/data/Status.class.php",
+            "model/data/User.class.php",
+            "model/db/DB.class.php",
+            "controllers/main.php",
+            "controllers/admins.php",
+            "controllers/categories.php",
+            "controllers/questions.php",
+            "controllers/questions_edit.php"
+        ]
+    }
+}

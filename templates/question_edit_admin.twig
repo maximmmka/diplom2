@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Выше 3 Мета-теги ** должны прийти в первую очередь в голове; любой другой руководитель контент *после* эти теги -->
+    <title>Администрирование</title>
+    <!-- Bootstrap -->
+    <link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- HTML5 Shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- Предупреждение: Respond.js не работает при просмотре страницы через файл:// -->
+    <!--[if lt IE 9]>
+<!--    <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script >-->
+    <!--<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>-->
+    <![endif]-->
+
+</head>
+<body>
+<div class="container">
+    <form role="form" class="form-horizontal" method="POST">
+        <legend>Редактирование вопроса</legend>
+        {% if error is not empty %}
+            <div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% endif %}
+        <div class="form-group">
+            <label for="category" class="control-label col-sm-2">Категория</label>
+            <div class="col-sm-10">
+                <select name="category" class="form-control">
+
+                    {% for category in categories %}
+                        <option
+                                {% if category.getCategoryId == answer.getCategoryId %}
+                                    selected
+                                {% endif %}
+                                value="{{ category.getCategoryId }}">{{ category.getCategoryName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-group has-feedback first">
+            <label for="name" class="control-label col-sm-2">Имя пользователя</label>
+            <div class="col-sm-10">
+                <input name="name" type="text" class="form-control" required="required" placeholder="Имя пользователя" value="{{ answer.getUser.getName }}"/>
+            </div>
+        </div>
+        <div class="form-group has-feedback first">
+            <label for="email" class="control-label col-sm-2" >E-mail</label>
+            <div class="col-sm-10">
+                <input name="email" type="email" class="form-control" required="required" placeholder="E-mail" value="{{ answer.getUser.getEmail }}"/>
+            </div>
+        </div>
+        <div class="form-group has-feedback first">
+            <label for="question" class="control-label col-sm-2" >Вопрос</label>
+            <div class="col-sm-10">
+                <textarea rows=6 name="question" class="form-control" required="required" placeholder="Вопрос">{{ answer.getQuestionName }}</textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="status" class="control-label col-sm-2">Статус</label>
+            <div class="col-sm-10">
+                <select name="status" class="form-control">
+
+                    {% for status in statuses %}
+                        <option
+                                {% if answer.getStatus.getId == status.getId %}
+                                    selected
+                                {% endif %}
+                                value="{{ status.getId }}">{{ status.getName }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="form-actions">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="submit" class="btn btn-primary" value="Сохранить" name="editQuestion"/>
+                <input type="submit" class="btn" value="Отменить" name="cancel"/>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<div class="table-responsive container" style="padding-bottom: 40px;">
+    <legend>Добавление ответа на вопрос</legend>
+
+    <form role="form" class="form-horizontal" method="POST">
+        <div class="form-group has-feedback second">
+            <label for="answer" class="control-label col-sm-2" >Ответ</label>
+            <div class="col-sm-10">
+                {% if edit_answer is not empty %}
+                    <textarea rows=6 name="answer" class="form-control" required="required" placeholder="Ответ">{{ edit_answer }}</textarea>
+                {%  else %}
+                    <textarea rows=6 name="answer" class="form-control" required="required" placeholder="Ответ"></textarea>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="hidden" name="add_edit" value="{{ addEdit }}">
+                <input type="submit" class="btn btn-primary" value=
+                    {% if addEdit == 'edit' %}
+                       "Сохранить"
+                    {% else %}
+                       "Добавить"
+                    {% endif %}
+                name="addedit"/>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-bordered"  style="margin-top: 60px;">
+        <thead>
+            <tr>
+                <th>Ответы</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ans in answers if ans.getAnswerName is not null %}
+            <tr>
+                <td>{{ ans.getAnswerName }}</td>
+                <td class="col-sm-2">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default">Действие</button>
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="index.php?mode=Questions_edit&id={{ ans.getQuestionId }}&answerId={{ ans.getAnswerId }}&action=edit">Изменить</a></li>
+                                <li><a href="index.php?mode=Questions_edit&id={{ ans.getQuestionId }}&answerId={{ ans.getAnswerId }}&action=delete">Удалить</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {%  endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+<script>
+    $(function() {
+        $('addedit').click(function() {
+            var formValid = true;
+            $('textarea').each(function() {
+                var formGroup = $(this).parents('.form-group.first');
+                if (this.checkValidity()) {
+                    formGroup.addClass('has-success').removeClass('has-error');
+                } else {
+                    formGroup.addClass('has-error').removeClass('has-success');
+                    formValid = false;
+                }
+            });
+
+            if (formValid) {
+                $('#formModalQuestion').modal('hide');
+            }
+        });
+    });
+
+    $(function() {
+        $('editQuestion').click(function() {
+            var formValid = true;
+            $('input, textarea').each(function() {
+                var formGroup = $(this).parents('.form-group.first');
+                if (this.checkValidity()) {
+                    formGroup.addClass('has-success').removeClass('has-error');
+                } else {
+                    formGroup.addClass('has-error').removeClass('has-success');
+                    formValid = false;
+                }
+            });
+
+            if (formValid) {
+                $('#formModalQuestion').modal('hide');
+            }
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+{% extends "main_admin.twig" %}
+
+{% block content %}
+
+<div class="table-responsive container"  style="padding-bottom: 40px; margin-top: 70px;">
+
+    <form role="form" class="form-horizontal" method="POST">
+        {% if error is not empty %}
+            <div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% endif %}
+
+        <div class="form-group has-feedback">
+            <label for="categoryName" class="form-control-label col-sm-1" >Тема</label>
+            <div class="col-sm-4">
+                {% if category is not null %}
+                    <input type="text" class="form-control" required="required" name="categoryName" pattern="{2,}" value="{{ category }}" placeholder="Тема">
+                {%  else %}
+                    <input type="text" class="form-control" required="required" name="categoryName" pattern="{6,}" placeholder="Тема">
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="hidden" name="add_edit" value="{{ addEdit }}">
+                <input type="submit" class="btn btn-primary" value=
+                    {% if addEdit == 'edit' %}
+                       "Сохранить"
+                    {% else %}
+                       "Добавить"
+                    {% endif %}
+                name="addedit" id="addedit"/>
+            </div>
+        </div>
+    </form>
+
+    <table class="table table-bordered"  style="margin-top: 60px;">
+        <thead>
+            <tr>
+                <th>Темы</th>
+                <th>Всего вопросов в теме</th>
+                <th>в т.ч. опубликовано</th>
+                <th>в т.ч. без ответа</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cat in categories %}
+            <tr>
+                <td>{{ cat.getCategoryName }}</td>
+                <td>{{ cat.getCount['countQuestions'] }}</td>
+                <td>{{ cat.getCount['countQuestionsPublic'] }}</td>
+                <td>{{ cat.getCount['countQuestionsNotWork'] }}</td>
+                <td class="col-sm-2">
+                    <div class="input-group">
+                        <div class="input-group-btn">
+                            <button type="button" class="btn btn-default">Действие</button>
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="caret"></span>
+                                <span class="sr-only">Toggle Dropdown</span>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a href="index.php?mode=Categories&id={{ cat.getCategoryId }}&action=edit">Изменить</a></li>
+                                <li><a href="index.php?mode=Categories&id={{ cat.getCategoryId }}&action=delete">Удалить</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {%  endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script>
+        $(function() {
+            $('#addedit').click(function() {
+
+                $('input').each(function() {
+                    var formGroup = $(this).parents('.form-group');
+                    if (this.checkValidity()) {
+                        formGroup.addClass('has-success').removeClass('has-error');
+                    } else {
+                        formGroup.addClass('has-error').removeClass('has-success');
+                    }
+                });
+
+            });
+        });
+    </script>
+{% endblock %}

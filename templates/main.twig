@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en" class="no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700' rel='stylesheet' type='text/css'>
+	<link href="vendor/twbs/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="css/reset.css"> <!-- CSS reset -->
+	<link rel="stylesheet" href="css/style.css"> <!-- Resource style -->
+	<script src="js/modernizr.js"></script> <!-- Modernizr -->
+	<title>FAQ</title>
+</head>
+<body>
+<header>
+	<h1>Вопросы и ответы</h1>
+</header>
+
+<div class="navbar navbar-fixed-top" role="navigation">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse text-left">
+        <div class="container col-xs-12" style="padding-top: 10px;">
+            <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                    {% if categories is empty %}
+                        disabled
+                    {% endif %}
+                    data-target="#formModalQuestion">
+                Задать вопрос
+            </button>
+            {% if mode['role'] == 'admin' %}
+                <a href="index.php?mode=Admins" class="btn btn-success btn-sm">Администрирование</a>
+            {% else %}
+                <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#formModalAdmin">
+                    Войти
+                </button>
+            {% endif %}
+
+            {% if mode['userName'] is not empty %}
+                <p style="margin-top: 10px;">{{ mode['userName'] }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<section class="cd-faq">
+	<ul class="cd-faq-categories">
+		{% for category in categories %}
+			<li><a
+			{% if loop.first %}
+				class="selected"
+			{% endif %}
+		    href="#{{ category.getCategoryId }}">{{ category.getCategoryName }}</a></li>
+		{% endfor %}
+	</ul>
+	<div class="cd-faq-items">
+        {% if error is not empty and formAdminHide is null %}
+			<div class="alert alert-danger" role="alert">{{ error }}</div>
+        {% endif %}
+
+        {% for category in categories %}
+			<ul id="{{ category.getCategoryId }}" class="cd-faq-group">
+				<li class="cd-faq-title"><h2>{{ category.getCategoryName }}</h2></li>
+
+				{% for question in questions if question.getCategoryId == category.getCategoryId %}
+					<li>
+						<a class="cd-faq-trigger" href="#0">{{ question.getQuestionName }}</a>
+                        <div class="cd-faq-content">
+                            {% for answer in answers if (question.getCategoryId == answer.getCategoryId and question.getQuestionId == answer.getQuestionId) %}
+                                    <p>{{ answer.getAnswerName }}</p>
+                            {% endfor %}
+                        </div>
+					</li>
+                {% endfor %}
+
+			</ul>
+        {% endfor %}
+
+	</div>
+	<a href="#0" class="cd-close-panel">Close</a>
+</section>
+
+<div class="modal fade" id="formModalQuestion" tabindex="-1" role="dialog" aria-labelledby="formModalQuestionLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content"  style="padding: 0 10px 0 10px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="formModalQuestionLabel">Введите вопрос</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" method="POST" role="form">
+                    <div class="form-group has-feedback">
+                        <label for="category" class="form-control-label">Тема:</label>
+                        <select name="category" class="form-control">
+
+                            {% for category in categories %}
+                                <option value="{{ category.getCategoryId }}">{{ category.getCategoryName }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if not (mode['question'] == 'user') %}
+                        <div class="form-group has-feedback">
+                            <label for="name" class="form-control-label">Имя (только буквы, не меньше 6 символов):</label>
+                            <input type="text" class="form-control" required="required" name="name" pattern="[A-Za-zА-Яа-я]{6,}">
+                        </div>
+                        <div class="form-group has-feedback">
+                            <label for="email" class="form-control-label">Email:</label>
+                            <input type="email" class="form-control" required="required" name="email">
+                        </div>
+                    {% endif %}
+                    <div class="form-group has-feedback">
+                        <label for="question" class="form-control-label">Введите вопрос:</label>
+                        <textarea rows="6" class="form-control" required="required" name="question"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <input type="submit" class="btn btn-default" data-dismiss="modal" value="Отмена">
+                        <input id="save" type="submit" class="btn btn-primary" value="Сохранить" name="saveMain">
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="formModalAdmin" tabindex="-1" role="dialog" aria-labelledby="formModalAdminLabel" aria-hidden="true">
+
+    <div class="modal-dialog" role="document">
+        <div class="modal-content"  style="padding: 0 10px 0 10px;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="formModalAdminLabel">Авторизуйтесь</h4>
+            </div>
+
+            {% if error is not empty %}
+                <div class="alert alert-danger" role="alert">{{ error }}</div>
+            {% endif %}
+
+
+            <div class="modal-body">
+                <form class="form-horizontal" method="POST" role="form">
+
+                    <div class="form-group has-feedback">
+                        <label for="login" class="form-control-label">Логин:</label>
+                        <input type="text" class="form-control" required="required" name="login" placeholder="Логин"
+                            {% if admin is not null %}
+                                value="{{ admin.login }}"
+                            {% endif %}
+                        >
+                    </div>
+                    <div class="form-group has-feedback">
+                        <label for="password" class="form-control-label">Пароль:</label>
+                        <input type="password" class="form-control" required="required" name="password"  placeholder="Пароль">
+                    </div>
+
+                    <div class="form-actions">
+                        <input type="submit" class="btn btn-default" data-dismiss="modal" value="Отмена">
+                        <input id="save" type="submit" class="btn btn-primary" value="Войти" name="adminMain">
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="js/jquery-2.1.1.js"></script>
+<script src="js/jquery.mobile.custom.min.js"></script>
+<script src="js/main.js"></script> <!-- Resource jQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="vendor/twbs/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script>
+    $(function() {
+        $('#save').click(function() {
+            var formValid = true;
+            $('input, textarea').each(function() {
+                var formGroup = $(this).parents('.form-group');
+                if (this.checkValidity()) {
+                    formGroup.addClass('has-success').removeClass('has-error');
+                } else {
+                    formGroup.addClass('has-error').removeClass('has-success');
+                    formValid = false;
+                }
+            });
+
+            if (formValid) {
+                $('#formModalQuestion').modal('hide');
+            }
+        });
+    });
+
+    $(function() {
+        $('#admin').click(function() {
+            var formValid = true;
+            $('input').each(function() {
+                var formGroup = $(this).parents('.form-group');
+                if (this.checkValidity()) {
+                    formGroup.addClass('has-success').removeClass('has-error');
+                } else {
+                    formGroup.addClass('has-error').removeClass('has-success');
+                    formValid = false;
+                }
+            });
+
+            if (formValid) {
+                $('#formModalAdmin').modal('hide');
+            }
+        });
+    });
+
+    {% if formAdminHide is not null and not formAdminHide %}
+        $("#formModalAdmin").modal('show');
+    {% endif %}
+
+</script>
+</body>
+</html>
